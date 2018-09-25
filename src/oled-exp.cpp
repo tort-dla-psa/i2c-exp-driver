@@ -17,11 +17,18 @@ fastOledDriver::fastOledDriver(fastDebuger debuger)
 }
 
 fastOledDriver::fastOledDriver(fastI2CDriver i2c_driver)
-	:i2c_driver(OLED_EXP_DEVICE_NUM, OLED_EXP_ADDR){}
+	:i2c_driver(OLED_EXP_DEVICE_NUM, OLED_EXP_ADDR)
+{
+	_bufsize = OLED_EXP_WIDTH * OLED_EXP_PAGES;
+	_buffer = new uint8_t[_bufsize];
+}
 
 fastOledDriver::fastOledDriver(fastI2CDriver i2c_driver, fastDebuger debuger)
 	:i2c_driver(i2c_driver),debuger(debuger)
-{}
+{
+	_bufsize = OLED_EXP_WIDTH * OLED_EXP_PAGES;
+	_buffer = new uint8_t[_bufsize];
+}
 
 fastOledDriver::~fastOledDriver() {
 	delete[] _buffer;
