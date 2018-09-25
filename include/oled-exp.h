@@ -6,8 +6,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <unistd.h>
-
-#include <onion-i2c.h>
+#include "onion-i2c.h"
 
 // Constants
 #define OLED_EXP_ADDR 					0x3C
@@ -207,68 +206,54 @@ static const uint8_t asciiTable[][OLED_EXP_CHAR_LENGTH] = {
 	{0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 };
 
-// Variables
-int 	_vccState;
-int 	_memoryMode;
+class fastOledDriver {
+	unsigned int _bufsize;
+	uint8_t* _buffer;
+	unsigned int _cursorRow, _cursorChar, _cursor;
+	int 	_vccState;
+	int 	_memoryMode;
+	int 	_bColumnsSetForText;
+	unsigned int	brightness;
+	bool	dim;
+	fastDebuger debuger;
+	fastI2CDriver i2c_driver;
+public:
+	fastOledDriver();
+	fastOledDriver(fastDebuger debuger);
+	fastOledDriver(fastI2CDriver i2c_driver);
+	fastOledDriver(fastI2CDriver i2c_driver, fastDebuger debuger);
+	~fastOledDriver();
+	void	setDebuger(fastDebuger debuger);
+	fastDebuger		getDebuger() const;
+	void	init();
+	void	draw();
+	void	clear();
+	void	setDisplayMode(bool bInvert);
+	void	sendCommand(uint8_t command);
+	void	setCursor(unsigned int row, unsigned int column);
+	void	sendData(uint8_t data);
+	void	setDisplayPower(bool bPowerOn);
+	void	setBrightness(unsigned int brightness);
+	unsigned int getBrightness() const;
+	void	setDim(bool dim);
+	bool	getDim() const;
+	bool	checkInit();
+	void	setMemoryMode(int mode);
+	int		getMemoryMode() const;
+	void	setCursorByPixel(unsigned int row, unsigned int pixel);
+	void	setColumnAddressing(unsigned int startPixel, unsigned int endPixel);
+	void	setTextColumns();
+	void	setImageColumns();
+	void	writeChar(const char c);
+	void	write(const char * msg);
+	void	draw(uint8_t * buffer, int bytes);
+	void	scroll(bool direction, int scrollSpeed, int startPage, int stopPage);
+	void	scrollDiagonal(bool direction, int scrollSpeed, int fixedRows, int scrollRows, int verticalOffset, int startPage, int stopPage);
+	void	scrollStop();
+	void	readLcdFile(char * file, uint8_t * buffer);
+	void	readLcdData(char * data, uint8_t * buffer);
+	void	printChar(char c);
+	void	lineScroll();
+};
 
-int 	_buffer[OLED_EXP_WIDTH * OLED_EXP_PAGES];
-int 	_cursor;
-
-int 	_cursorInRow;
-int 	_bColumnsSetForText;
-
-#ifdef __cplusplus
-extern "C" {
 #endif
-
-//// Functions
-int 		_oledSendCommand 			(int command);
-int 		_oledSendData				(int data);
-
-// initialization and clearing
-int 		oledDriverInit 				();
-int 		oledCheckInit 				();
-int 		oledClear 					();
-
-// configuration
-int 		oledSetDisplayPower			(int bPowerOn);
-int 		oledSetDisplayMode			(int bInvert);
-int 		oledSetBrightness 			(int brightness);
-int 		oledSetDim 					(int dim);
-int 		oledSetMemoryMode			(int mode);
-
-int 		oledSetCursor				(int row, int column);
-int 		oledSetCursorByPixel 		(int row, int pixel);
-
-int 		oledSetColumnAddressing 	(int startPixel, int endPixel);
-int 		oledSetTextColumns			();
-int 		oledSetImageColumns 		();
-
-// writing to the display
-int 		oledWriteChar 				(char c);
-int 		oledWrite 					(char *msg);
-int 		oledWriteByte				(int byte);
-
-int 		oledDraw 					(uint8_t *buffer, int bytes);
-
-// scroll the display
-int 		oledScroll 					(int direction, int scrollSpeed, int startPage, int stopPage);
-int 		oledScrollDiagonal 			(int direction, int scrollSpeed, int fixedRows, int scrollRows, int verticalOffset, int startPage, int stopPage);
-int 		oledScrollStop 				();
-
-// reading lcd data
-int 		oledReadLcdFile				(char* file, uint8_t *buffer);
-int 		oledReadLcdData				(char* data, uint8_t *buffer);
-
-// writing to the buffer
-int 		oledDisplay 				();
-int 		oledPrintChar 				(char c);
-
-int 		oledLineScroll 				();
-int 		oledNewLine 				();
-int 		oledPrintLine 				();
-
-#ifdef __cplusplus
-}
-#endif
-#endif // _OLED_EXP_H_

@@ -15,24 +15,17 @@
 #define ONION_VERBOSITY_VERBOSE			(ONION_SEVERITY_DEBUG)
 #define ONION_VERBOSITY_EXTRA_VERBOSE	(ONION_SEVERITY_DEBUG_EXTRA)
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif 
-
-#ifdef __cplusplus
-extern 
-#endif 
-int 	onionVerbosityLevel;
-
-// debug functions
-void 	onionSetVerbosity		(int verbosityLevel);
-int 	onionGetVerbosity 		();
-
-void 	onionPrint 				(int severity, const char* msg, ...);
-
-#ifdef __cplusplus
-}
-#endif
-
+class fastDebuger {
+	int 	verbosityLevel;
+public:
+	fastDebuger();
+	fastDebuger(int verbosityLevel);
+	fastDebuger(const fastDebuger &src);
+	~fastDebuger();
+	// debug functions
+	void 	setVerbosity(int verbosityLevel);
+	int 	getVerbosity() const;
+	void 	print(int severity, const char* msg, ...);
+	void	operator = (const fastDebuger &rhs);
+};
 #endif // _ONION_DEBUG_H_ 

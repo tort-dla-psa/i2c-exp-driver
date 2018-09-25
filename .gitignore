@@ -7,3 +7,8 @@ src/ubus-pwm-exp.c
 src/python/onionI2C.py
 
 common_commands.txt
+/.vs
+/FastOledExp
+/FastOledExp.vcxproj.user
+/FastOledExp.vcxproj
+/FastOledExp.sln
