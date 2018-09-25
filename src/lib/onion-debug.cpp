@@ -15,7 +15,7 @@ inline int fastDebuger::getVerbosity () const {
 	return verbosityLevel;
 }
 
-void fastDebuger::print (int severity, const char* msg, ...) {
+inline void fastDebuger::print (int severity, const char* msg, ...) {
 	va_list 	argptr;	
 	if (verbosityLevel >= severity) {
 		va_start(argptr, msg);
