@@ -68,7 +68,7 @@ bool fastI2CDriver::_setDevice10bit(uint8_t addr) {
 bool fastI2CDriver::_write(const uint8_t * buffer, int size) {
 	int 	index;
 	// set the device address
-	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s writing buffer:\n", I2C_PRINT_BANNER);
+	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s writing buffer %d %d:\n", I2C_PRINT_BANNER, devNum, devAddr);
 	for (index = 0; index < size; index++) {
 		debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "\tbuffer[%d]: 0x%02x\n", index, buffer[index]);
 	}
