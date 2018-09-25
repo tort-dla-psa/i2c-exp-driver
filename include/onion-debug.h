@@ -27,5 +27,6 @@ public:
 	int 	getVerbosity() const;
 	void 	print(int severity, const char* msg, ...);
 	void	operator = (const fastDebuger &rhs);
+	bool	operator == (const fastDebuger &rhs);
 };
 #endif // _ONION_DEBUG_H_ 

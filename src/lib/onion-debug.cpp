@@ -27,3 +27,7 @@ void fastDebuger::print (int severity, const char* msg, ...) {
 void fastDebuger::operator=(const fastDebuger & rhs) {
 	this->verbosityLevel = rhs.getVerbosity();
 }
+
+bool fastDebuger::operator==(const fastDebuger & rhs) {
+	return this->verbosityLevel == rhs.getVerbosity();
+}

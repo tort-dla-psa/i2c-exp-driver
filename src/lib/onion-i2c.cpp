@@ -112,10 +112,12 @@ fastI2CDriver::~fastI2CDriver() {
 	_releaseFd();
 }
 
-void fastI2CDriver::setDebuger(fastDebuger debuger) {}
+inline void fastI2CDriver::setDebuger(fastDebuger debuger) {
+	this->debuger = debuger;
+}
 
-fastDebuger fastI2CDriver::getDebuger() const {
-	return fastDebuger();
+inline fastDebuger fastI2CDriver::getDebuger() const {
+	return debuger;
 }
 
 inline bool fastI2CDriver::setDevice(int devNum) {
