@@ -106,7 +106,7 @@ void fastOledDriver::setDisplayMode(bool bInvert) {
 }
 
 inline void fastOledDriver::sendCommand(uint8_t command) {
-	i2c_driver.write(OLED_EXP_REG_COMMAND, command);
+	i2c_driver.write(OLED_EXP_REG_COMMAND, &command, 1);
 }
 
 // clear the OLED screen
