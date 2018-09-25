@@ -3,32 +3,19 @@
 
 fastOledDriver::fastOledDriver()
 	:i2c_driver(OLED_EXP_DEVICE_NUM, OLED_EXP_ADDR)
-{
-	_bufsize = OLED_EXP_WIDTH * OLED_EXP_PAGES;
-	_buffer = new uint8_t[_bufsize];
-}
-
+{}
 
 fastOledDriver::fastOledDriver(fastDebuger debuger)
 	:i2c_driver(OLED_EXP_DEVICE_NUM, OLED_EXP_ADDR),debuger(debuger)
-{
-	_bufsize = OLED_EXP_WIDTH * OLED_EXP_PAGES;
-	_buffer = new uint8_t[_bufsize];
-}
+{}
 
 fastOledDriver::fastOledDriver(fastI2CDriver i2c_driver)
 	:i2c_driver(OLED_EXP_DEVICE_NUM, OLED_EXP_ADDR)
-{
-	_bufsize = OLED_EXP_WIDTH * OLED_EXP_PAGES;
-	_buffer = new uint8_t[_bufsize];
-}
+{}
 
 fastOledDriver::fastOledDriver(fastI2CDriver i2c_driver, fastDebuger debuger)
 	:i2c_driver(i2c_driver),debuger(debuger)
-{
-	_bufsize = OLED_EXP_WIDTH * OLED_EXP_PAGES;
-	_buffer = new uint8_t[_bufsize];
-}
+{}
 
 fastOledDriver::~fastOledDriver() {
 	delete[] _buffer;
@@ -42,7 +29,8 @@ fastDebuger fastOledDriver::getDebuger() const {
 
 void fastOledDriver::init() {
 	debuger.print(ONION_SEVERITY_INFO, "> initializing display\n");
-
+	_bufsize = OLED_EXP_WIDTH * OLED_EXP_PAGES;
+	_buffer = new uint8_t[_bufsize];
 	memset(_buffer, 0, _bufsize);	// initialize the buffer
 	_cursorRow = 0;					// initialize the cursor
 	_cursorChar = 0;				// initialize the row cursor

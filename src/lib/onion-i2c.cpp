@@ -282,7 +282,7 @@ inline bool fastI2CDriver::readByte(int * val) {
 	return readByte(addr, val);
 }
 
-bool fastI2CDriver::operator=(const fastI2CDriver & rhs) {
+bool fastI2CDriver::operator==(const fastI2CDriver & rhs) {
 	return (devNum==rhs.getDevice() &&
 		devAddr==rhs.getDevAddr() &&
 		fd==rhs.fd);

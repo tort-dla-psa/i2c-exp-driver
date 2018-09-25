@@ -62,6 +62,6 @@ public:
 	bool 	read(uint8_t *buffer, int numBytes);
 	bool 	readByte(uint8_t addr, int *val);
 	bool 	readByte(int *val);
-	bool	operator = (const fastI2CDriver &rhs);
+	bool	operator == (const fastI2CDriver &rhs);
 };
 #endif // _ONION_I2C_H_
