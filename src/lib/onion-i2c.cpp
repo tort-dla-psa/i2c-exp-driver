@@ -5,7 +5,9 @@ bool fastI2CDriver::_getFd(int adapterNum) {
 	char 	pathname[255];
 	// define the path to open
 	status = snprintf(pathname, sizeof(pathname), I2C_DEV_PATH, adapterNum);
-	// check the filename
+	// check the filename	
+	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s opening device %d, %s\n", I2C_PRINT_BANNER,adapterNum,pathname);
+
 	if (status < 0 || status >= sizeof(pathname)) {
 		// add errno
 		return write_possible = false;
@@ -13,6 +15,7 @@ bool fastI2CDriver::_getFd(int adapterNum) {
 	// create a file descriptor for the I2C bus
 #ifdef I2C_ENABLED
 	fd = open(pathname, O_RDWR);
+	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s fd =  %d\n", I2C_PRINT_BANNER, fd);
 #else
 	fd = 0;
 #endif
@@ -89,13 +92,15 @@ fastI2CDriver::fastI2CDriver(int devNum, uint8_t devAddr)
 	debuger = fastDebuger();
 	_getFd(devNum);
 	_setDevice(devAddr);
+	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s constructor done, write:%d\n", I2C_PRINT_BANNER, (write_possible?1:0));
 }
 
 fastI2CDriver::fastI2CDriver(int devNum, uint8_t devAddr, fastDebuger debuger)
 	: devNum(devNum), devAddr(devAddr), debuger(debuger) 
 {
 	_getFd(devNum);
-	_setDevice(devAddr);
+	_setDevice(devAddr);	
+	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s constructor done, write:%d\n", I2C_PRINT_BANNER, (write_possible ? 1 : 0));
 }
 
 fastI2CDriver::fastI2CDriver(const fastI2CDriver & src) {
@@ -105,7 +110,8 @@ fastI2CDriver::fastI2CDriver(const fastI2CDriver & src) {
 	this->debuger = src.getDebuger();
 	this->fd = src.fd;
 	_getFd(devNum);
-	_setDevice(devAddr);
+	_setDevice(devAddr);	
+	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s constructor done, write:%d\n", I2C_PRINT_BANNER, (write_possible ? 1 : 0));
 }
 
 fastI2CDriver::~fastI2CDriver() {
@@ -179,7 +185,7 @@ bool fastI2CDriver::write(uint8_t addr, int val) {
 	tmp = (val >> 8);	// start with byte 1
 	index = 2;
 	while (tmp > 0x00) {
-		buffer[index] = (uint8_t)(tmp & 0xff);
+		buffer[index] = tmp & 0xff;
 		tmp = tmp >> 8; // advance the tmp data by a byte
 		index++; 		// increment the index
 		size++;			// increase the size
