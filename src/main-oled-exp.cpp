@@ -55,14 +55,13 @@ void usage(const char* progName)
 // execute a specified command
 int command(char *command, char *param)
 {
-	int 	status;
 	int 	val0, val1;
 	uint8_t	*buffer;
 
 	// perform the specified command
 	dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "command = '%s', param = '%s'\n", command, param);
 	if (strcmp(command, "write") == 0 ) {	
-		status	= drv.write(param);
+		drv.write(param);
 	}
 	else if (strcmp(command, "writeByte") == 0 ) {	
 		// parse the byte
@@ -72,11 +71,10 @@ int command(char *command, char *param)
 		else {
 			sscanf(param, "%02x", &val0);
 		}
-		
-		status	= drv.writeByte(val0);
+		drv.writeByte(val0);
 	}
 	else if (strcmp(command, "brightness") == 0 ) {
-		status	= drv.setBrightness( atoi(param) );
+		drv.setBrightness( atoi(param) );
 	}
 	else if (strcmp(command, "invert") == 0 ) {
 		// interpret the parameter
@@ -84,7 +82,7 @@ int command(char *command, char *param)
 		if (strcmp(param, "on") == 0 ) {
 			val0 = 1;
 		}
-		status	= drv.setDisplayMode( val0 );
+		drv.setDisplayMode( val0 );
 	}
 	else if (strcmp(command, "power") == 0 ) {
 		// interpret the parameter
@@ -92,7 +90,7 @@ int command(char *command, char *param)
 		if (strcmp(param, "on") == 0 ) {
 			val0 = 1;
 		}
-		status	= drv.setDisplayPower(val0);
+		drv.setDisplayPower(val0);
 	}
 	else if (strcmp(command, "dim") == 0 ) {
 		// interpret the parameter
@@ -100,21 +98,21 @@ int command(char *command, char *param)
 		if (strcmp(param, "on") == 0 ) {
 			val0 = 1;
 		}
-		status	= drv.setDim(val0);
+		drv.setDim(val0);
 	}
 	else if (strcmp(command, "cursor") == 0 ) {
 		// interpret the parameter
 		sscanf(param, "%d, %d", &val0, &val1);
 		dbg.print(ONION_SEVERITY_INFO, "> Setting cursor to (%d, %d)\n", val0, val1);
-		status 	= drv.setTextColumns();
-		status	= drv.setCursor(val0, val1);
+		drv.setTextColumns();
+		drv.setCursor(val0, val1);
 	}
 	else if (strcmp(command, "cursorPixel") == 0 ) {
 		// interpret the parameter
 		sscanf(param, "%d, %d", &val0, &val1);
 		dbg.print(ONION_SEVERITY_INFO, "> Setting cursor to row: %d, pixel: %d\n", val0, val1);
-		status 	= drv.setImageColumns();
-		status	= drv.setCursorByPixel(val0, val1);
+		drv.setImageColumns();
+		drv.setCursorByPixel(val0, val1);
 	}
 	else if (strcmp(command, "draw") == 0 ) {
 		// allocate memory for the buffer
@@ -135,20 +133,19 @@ int command(char *command, char *param)
 			dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "  after move: param length is %d\n", strlen(param) );
 
 			// read the data into a buffer
-			status 	= drv.readLcdData(param, buffer);
+			drv.readLcdData(param, buffer);
 		}
 		else {
 			// read data from a file
 			dbg.print(ONION_SEVERITY_INFO, "> Reading data from file '%s'\n", param);
-			status 	= drv.readLcdFile(param, buffer);
+			drv.readLcdFile(param, buffer);
 		}
 
-		if (status == EXIT_SUCCESS) {
-			status	= drv.draw(buffer, OLED_EXP_WIDTH*OLED_EXP_HEIGHT/8);
-		}
+		drv.draw(buffer, OLED_EXP_WIDTH*OLED_EXP_HEIGHT/8);
+		/*}
 		else {
 			dbg.print(ONION_SEVERITY_FATAL, "ERROR: Cannot draw invalid data\n");
-		}
+		}*/
 
 		// deallocate memory for the buffer
 		if (buffer != NULL) {
@@ -178,15 +175,15 @@ int command(char *command, char *param)
 		}
 
 		if (val0 == -1) {
-			status 	= drv.scrollStop();
+			drv.scrollStop();
 		}
 		else if (val0 == 0) {
 			// horizontal scrolling
-			status 	= drv.scroll(val1, OLED_EXP_SCROLL_SPEED_5_FRAMES, 0, OLED_EXP_CHAR_ROWS-1);
+			drv.scroll(val1, OLED_EXP_SCROLL_SPEED_5_FRAMES, 0, OLED_EXP_CHAR_ROWS-1);
 		}
 		else if (val0 == 1) {
 			// diagonal scrolling
-			status 	= drv.scrollDiagonal (	val1, 								// direction
+			drv.scrollDiagonal (	val1, 								// direction
 											OLED_EXP_SCROLL_SPEED_5_FRAMES, 	// scroll speed
 											0, 									// # fixed rows
 											OLED_EXP_HEIGHT, 					// # scrolling rows
@@ -200,7 +197,7 @@ int command(char *command, char *param)
 		dbg.print(ONION_SEVERITY_FATAL, "> Unrecognized command '%s'\n", command );
 	}
 
-	return status;
+	return EXIT_SUCCESS;
 }
 
 int main(int argc, char** argv)
@@ -266,10 +263,8 @@ int main(int argc, char** argv)
 
 	//// OLED PROGRAMMING
 	// check if OLED Expansion is present
-	status 	= drv.checkInit();
-
 	// exit the app if i2c reads fail
-	if (status == EXIT_FAILURE) {
+	if (drv.checkInit() == false) {
 		dbg.print(ONION_SEVERITY_FATAL, "> ERROR: OLED Expansion not found!\n");
 		return 0;
 	}
@@ -277,8 +272,8 @@ int main(int argc, char** argv)
 
 	// initialize display
 	if ( init == 1 ) {
-		status 	= drv.driverInit();
-		if (status == EXIT_FAILURE) {
+		drv.init();
+		if (drv.checkInit() == false) {
 			dbg.print(ONION_SEVERITY_FATAL, "main-oled-exp:: display init failed!\n");
 		}
 	}
@@ -286,10 +281,10 @@ int main(int argc, char** argv)
 	// clear screen
 	if ( clear == 1 ) {
 		dbg.print(ONION_SEVERITY_INFO, "> Clearing display\n");
-		status 	= drv.clear();
-		if (status == EXIT_FAILURE) {
+		drv.clear();
+		/*if (status == EXIT_FAILURE) {
 			dbg.print(ONION_SEVERITY_FATAL, "main-oled-exp:: display clear failed!\n");
-		}
+		}*/
 	}
 
 
@@ -320,7 +315,7 @@ int main(int argc, char** argv)
 		}
 
 		// perform the specified command
-		status 	= drv.command(command, param);
+		status 	= command(command, param);
 		if (status != EXIT_SUCCESS) {
 			dbg.print(ONION_SEVERITY_FATAL, "ERROR: command '%s' failed!\n", command);
 		}
