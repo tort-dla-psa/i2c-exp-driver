@@ -3,7 +3,7 @@
 
 // function prototypes:
 void 	Usage 				(const char* progName);
-int 	drv.command 		(char *command, char *param);
+int 	command 		(char *command, char *param);
 fastDebuger dbg;
 fastOledDriver drv;
 
@@ -53,7 +53,7 @@ void usage(const char* progName)
 }
 
 // execute a specified command
-int drv.command(char *command, char *param)
+int command(char *command, char *param)
 {
 	int 	status;
 	int 	val0, val1;
