@@ -65,13 +65,14 @@ int commandExec(char *command, char *param)
 	}
 	else if (strcmp(command, "writeByte") == 0 ) {	
 		// parse the byte
+		uint8_t byte;
 		if (param[0] == '0' && param[1] == 'x') {
-			sscanf(param, "0x%02x", &val0);
+			sscanf(param, "0x%02x", &byte);
 		}
 		else {
-			sscanf(param, "%02x", &val0);
+			sscanf(param, "%02x", &byte);
 		}
-		drv.sendData(val0);
+		drv.sendData(byte);
 	}
 	else if (strcmp(command, "brightness") == 0 ) {
 		drv.setBrightness( atoi(param) );
