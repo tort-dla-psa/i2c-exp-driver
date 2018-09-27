@@ -6,6 +6,11 @@
 #include <stdio.h>
 #include <math.h>
 #include <unistd.h>
+
+
+#ifdef DEBUG
+#include "onion-debug.h"
+#endif
 #include "onion-i2c.h"
 
 // Constants
@@ -215,16 +220,20 @@ class fastOledDriver {
 	int 	_bColumnsSetForText;
 	unsigned int	brightness;
 	bool	dim;
+#ifdef DEBUG
 	fastDebuger debuger;
+#endif
 	fastI2CDriver i2c_driver;
 public:
 	fastOledDriver();
-	fastOledDriver(fastDebuger debuger);
-	fastOledDriver(fastI2CDriver i2c_driver);
-	fastOledDriver(fastI2CDriver i2c_driver, fastDebuger debuger);
 	~fastOledDriver();
+	fastOledDriver(fastI2CDriver i2c_driver);
+#ifdef DEBUG
+	fastOledDriver(fastDebuger debuger);
+	fastOledDriver(fastI2CDriver i2c_driver, fastDebuger debuger);
 	void	setDebuger(fastDebuger debuger);
 	fastDebuger		getDebuger() const;
+#endif
 	void	init();
 	void	draw();
 	void	clear();

@@ -6,7 +6,6 @@ bool fastI2CDriver::_getFd(int adapterNum) {
 	// define the path to open
 	status = snprintf(pathname, sizeof(pathname), I2C_DEV_PATH, adapterNum);
 	// check the filename	
-	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s opening device %d, %s\n", I2C_PRINT_BANNER,adapterNum,pathname);
 
 	if (status < 0 || status >= sizeof(pathname)) {
 		// add errno
@@ -15,7 +14,9 @@ bool fastI2CDriver::_getFd(int adapterNum) {
 	// create a file descriptor for the I2C bus
 #ifdef I2C_ENABLED
 	fd = open(pathname, O_RDWR);
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s fd =  %d\n", I2C_PRINT_BANNER, fd);
+#endif
 #else
 	fd = 0;
 #endif
@@ -68,16 +69,20 @@ bool fastI2CDriver::_setDevice10bit(uint8_t addr) {
 bool fastI2CDriver::_write(const uint8_t * buffer, int size) {
 	int 	index;
 	// set the device address
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s writing buffer %d %d:\n", I2C_PRINT_BANNER, devNum, devAddr);
 	for (index = 0; index < size; index++) {
 		debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "\tbuffer[%d]: 0x%02x\n", index, buffer[index]);
 	}
+#endif
 #ifdef I2C_ENABLED
 	// perform the write
 	if (write_possible) {
 		// write to the i2c device
 		if (::write(fd, buffer, size) != size) {
+#ifdef DEBUG
 			debuger.print(ONION_SEVERITY_FATAL, "%s write issue for register 0x%02x, errno is %d: %s\n", I2C_PRINT_BANNER, buffer[0], errno, strerror(errno));
+#endif
 			return false;
 		}
 		return true;
@@ -89,35 +94,39 @@ bool fastI2CDriver::_write(const uint8_t * buffer, int size) {
 fastI2CDriver::fastI2CDriver(int devNum, uint8_t devAddr)
 	:devNum(devNum), devAddr(devAddr)
 {
+#ifdef DEBUG
 	debuger = fastDebuger();
+#endif
 	_getFd(devNum);
 	_setDevice(devAddr);
-	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s constructor done, write:%d\n", I2C_PRINT_BANNER, (write_possible?1:0));
 }
 
+#ifdef DEBUG
 fastI2CDriver::fastI2CDriver(int devNum, uint8_t devAddr, fastDebuger debuger)
 	: devNum(devNum), devAddr(devAddr), debuger(debuger) 
 {
 	_getFd(devNum);
 	_setDevice(devAddr);	
-	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s constructor done, write:%d\n", I2C_PRINT_BANNER, (write_possible ? 1 : 0));
 }
+#endif
 
 fastI2CDriver::fastI2CDriver(const fastI2CDriver & src) {
 	this->devNum = src.getDevice();
 	this->devAddr = src.getDevAddr();
 	this->addr = src.getAddr();
+#ifdef DEBUG
 	this->debuger = src.getDebuger();
+#endif
 	this->fd = src.fd;
 	_getFd(devNum);
 	_setDevice(devAddr);	
-	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s constructor done, write:%d\n", I2C_PRINT_BANNER, (write_possible ? 1 : 0));
+	//debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "%s constructor done, write:%d\n", I2C_PRINT_BANNER, (write_possible ? 1 : 0));
 }
 
 fastI2CDriver::~fastI2CDriver() {
 	_releaseFd();
 }
-
+#ifdef DEBUG
 inline void fastI2CDriver::setDebuger(fastDebuger debuger) {
 	this->debuger = debuger;
 }
@@ -125,7 +134,7 @@ inline void fastI2CDriver::setDebuger(fastDebuger debuger) {
 inline fastDebuger fastI2CDriver::getDebuger() const {
 	return debuger;
 }
-
+#endif
 inline bool fastI2CDriver::setDevice(int devNum) {
 	this->devNum = devNum;
 	return _getFd(devNum);
@@ -190,7 +199,9 @@ bool fastI2CDriver::write(uint8_t addr, int val) {
 		index++; 		// increment the index
 		size++;			// increase the size
 	}
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_DEBUG, "%s Writing to device 0x%02x: addr = 0x%02x, data = 0x%02x (data size: %d)\n", I2C_PRINT_BANNER, devAddr, addr, val, (size - 1));
+#endif
 	// write the buffer
 	return write(buffer, size);
 }
@@ -214,7 +225,9 @@ bool fastI2CDriver::writeBytes(uint8_t addr, int val, int numBytes) {
 		buffer[index + 1] = (val >> (8 * index));
 		size++;			// increase the size
 	}
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_DEBUG, "%s Writing to device 0x%02x: addr = 0x%02x, data = 0x%02x (data size: %d)\n", I2C_PRINT_BANNER, devAddr, addr, val, (size - 1));
+#endif
 	// write the buffer
 	return _write(buffer, size);
 }
@@ -226,7 +239,9 @@ inline bool fastI2CDriver::writeBytes(int val, int numBytes) {
 bool fastI2CDriver::read(uint8_t addr, uint8_t * buffer, int numBytes) {
 	int 	size, index;
 	bool	status;
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_DEBUG, "%s Reading %d byte%s from device 0x%02x: addr = 0x%02x", I2C_PRINT_BANNER, numBytes, (numBytes > 1 ? "s" : ""), devAddr, addr);
+#endif
 	// set the device address
 	if (write_possible) {
 		_setDevice(devAddr);
@@ -242,7 +257,9 @@ bool fastI2CDriver::read(uint8_t addr, uint8_t * buffer, int numBytes) {
 #ifdef I2C_ENABLED
 		// write to the i2c device
 		if (write(fd, buffer, size) != size) {
+#ifdef DEBUG
 			debuger.print(ONION_SEVERITY_FATAL, "%s write issue for register 0x%02x, errno is %d: %s\n", I2C_PRINT_BANNER, addr, errno, strerror(errno));
+#endif
 		}
 #endif
 		//// read data
@@ -252,7 +269,9 @@ bool fastI2CDriver::read(uint8_t addr, uint8_t * buffer, int numBytes) {
 		// read from the i2c device
 		size = numBytes;
 		if (::read(fd, buffer, size) != size) {
+#ifdef DEBUG
 			debuger.print(ONION_SEVERITY_FATAL, "%s read issue for register 0x%02x, errno is %d: %s\n", I2C_PRINT_BANNER, addr, errno, strerror(errno));
+#endif
 			status = false;
 		} else {
 			status = true;
@@ -262,11 +281,13 @@ bool fastI2CDriver::read(uint8_t addr, uint8_t * buffer, int numBytes) {
 		size = 1;
 #endif
 		//// print the data
+#ifdef DEBUG
 		debuger.print(ONION_SEVERITY_DEBUG, "\tread %d byte%s, value: 0x", size, (size > 1 ? "s" : ""));
 		for (index = (size - 1); index >= 0; index--) {
 			debuger.print(ONION_SEVERITY_DEBUG, "%02x", (buffer[index] & 0xff));
 		}
 		debuger.print(ONION_SEVERITY_DEBUG, "\n");
+#endif
 	}
 	// release the device file handle
 	return status;

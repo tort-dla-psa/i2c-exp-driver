@@ -17,7 +17,6 @@
 #include <stdint.h>
 #include <errno.h>
 
-#include "onion-debug.h"
 
 #define I2C_DEV_PATH		"/dev/i2c-%d"
 #define I2C_PRINT_BANNER	"onion-i2c::"
@@ -29,6 +28,10 @@
 	#define I2C_ENABLED		1
 #endif
 
+#ifdef DEBUG
+#include "onion-debug.h"
+#endif
+
 class fastI2CDriver {
 	bool 	_getFd(int adapterNum);
 	bool 	_releaseFd();
@@ -38,14 +41,18 @@ class fastI2CDriver {
 	int		devNum, addr, fd;
 	uint8_t devAddr;
 	bool	write_possible;
+#ifdef DEBUG
 	fastDebuger debuger;
+#endif
 public:
 	fastI2CDriver(int devNum, uint8_t devAddr);
-	fastI2CDriver(int devNum, uint8_t devAddr, fastDebuger debuger);
 	fastI2CDriver(const fastI2CDriver &src);
 	~fastI2CDriver();
+#ifdef DEBUG
+	fastI2CDriver(int devNum, uint8_t devAddr, fastDebuger debuger);
 	void	setDebuger(fastDebuger debuger);
 	fastDebuger		getDebuger() const;
+#endif
 	bool	setDevice(int devNum);
 	int		getDevice() const;
 	bool	setDevAddr(uint8_t devAddr);

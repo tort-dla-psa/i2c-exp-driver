@@ -5,30 +5,33 @@ fastOledDriver::fastOledDriver()
 	:i2c_driver(OLED_EXP_DEVICE_NUM, OLED_EXP_ADDR)
 {}
 
-fastOledDriver::fastOledDriver(fastDebuger debuger)
-	:i2c_driver(OLED_EXP_DEVICE_NUM, OLED_EXP_ADDR),debuger(debuger)
-{}
+fastOledDriver::~fastOledDriver() {
+	delete[] _buffer;
+}
 
 fastOledDriver::fastOledDriver(fastI2CDriver i2c_driver)
-	:i2c_driver(OLED_EXP_DEVICE_NUM, OLED_EXP_ADDR)
+	: i2c_driver(OLED_EXP_DEVICE_NUM, OLED_EXP_ADDR) {}
+
+#ifdef DEBUG
+fastOledDriver::fastOledDriver(fastDebuger debuger)
+	:i2c_driver(OLED_EXP_DEVICE_NUM, OLED_EXP_ADDR),debuger(debuger)
 {}
 
 fastOledDriver::fastOledDriver(fastI2CDriver i2c_driver, fastDebuger debuger)
 	:i2c_driver(i2c_driver),debuger(debuger)
 {}
 
-fastOledDriver::~fastOledDriver() {
-	delete[] _buffer;
-}
-
 void fastOledDriver::setDebuger(fastDebuger debuger) {}
 
 fastDebuger fastOledDriver::getDebuger() const {
 	return fastDebuger();
 }
+#endif
 
 void fastOledDriver::init() {
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_INFO, "> initializing display\n");
+#endif
 	_bufsize = OLED_EXP_WIDTH * OLED_EXP_PAGES;
 	_buffer = new uint8_t[_bufsize];
 	memset(_buffer, 0, _bufsize);	// initialize the buffer
@@ -98,10 +101,12 @@ void fastOledDriver::draw() {
 }
 
 void fastOledDriver::setDisplayMode(bool bInvert) {
+#ifdef DEBUG
 	debuger.print((bInvert ? ONION_SEVERITY_INFO : ONION_SEVERITY_DEBUG),
 		"> Setting display mode to %s\n",
 		(!bInvert ? "inverted" : "normal")
 	);
+#endif
 	sendCommand(bInvert ? OLED_EXP_NORMAL_DISPLAY : OLED_EXP_INVERT_DISPLAY);
 }
 
@@ -112,7 +117,9 @@ inline void fastOledDriver::sendCommand(uint8_t command) {
 // clear the OLED screen
 void fastOledDriver::clear() {
 	int 	charRow, pixelCol;
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_DEBUG, "> clearing display\n");
+#endif
 	// set the column addressing for the full width
 	setImageColumns();
 	// display off
@@ -131,14 +138,20 @@ void fastOledDriver::clear() {
 }
 
 void fastOledDriver::setCursor(unsigned int row, unsigned int column) {
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_DEBUG, "> Setting cursor to (%d, %d)\n", row, column);
+#endif
 	// check the inputs
 	if (row >= OLED_EXP_CHAR_ROWS) {
+#ifdef DEBUG
 		debuger.print(ONION_SEVERITY_FATAL, "ERROR: Attempting to set cursor to invalid row '%d'\n", row);
+#endif
 		return;
 	}
 	if (column >= OLED_EXP_CHAR_COLUMNS) {
+#ifdef DEBUG
 		debuger.print(ONION_SEVERITY_FATAL, "ERROR: Attempting to set cursor to invalid column '%d'\n", column);
+#endif
 		return;
 	}
 	// set page address
@@ -155,7 +168,9 @@ inline void fastOledDriver::sendData(uint8_t data) {
 
 void fastOledDriver::setDisplayPower(bool bPowerOn) {
 	uint8_t	cmd;
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_INFO, "> Setting display to %s\n", (bPowerOn == 1 ? "ON" : "OFF"));
+#endif
 	// set the command code
 	if (bPowerOn) {
 		cmd = OLED_EXP_DISPLAY_ON;
@@ -175,7 +190,9 @@ void fastOledDriver::setBrightness(unsigned int brightness) {
 		brightness = OLED_EXP_CONTRAST_MAX;
 	}
 	// send the command
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_DEBUG, "> Setting display brightness to %d/%d\n", brightness, OLED_EXP_CONTRAST_MAX);
+#endif
 	sendCommand(OLED_EXP_SET_CONTRAST);
 	sendCommand(brightness);
 }
@@ -190,14 +207,18 @@ void fastOledDriver::setDim(bool dim) {
 	if (dim) {
 		// dim 
 		brightness = OLED_EXP_CONTRAST_MIN;
+#ifdef DEBUG
 		debuger.print(ONION_SEVERITY_INFO, "> Dimming display\n");
+#endif
 	} else {
 		// normal
 		brightness = OLED_EXP_DEF_CONTRAST_SWITCH_CAP_VCC;
 		if (_vccState == OLED_EXP_EXTERNAL_VCC) {
 			brightness = OLED_EXP_DEF_CONTRAST_EXTERNAL_VCC;
 		}
+#ifdef DEBUG
 		debuger.print(ONION_SEVERITY_INFO, "> Setting normal display brightness\n");
+#endif
 	}
 	// send the command
 	this->dim = dim;
@@ -219,7 +240,9 @@ void fastOledDriver::setMemoryMode(int mode) {
 		mode != OLED_EXP_MEM_VERTICAL_ADDR_MODE &&
 		mode != OLED_EXP_MEM_PAGE_ADDR_MODE
 		) {
+#ifdef DEBUG
 		debuger.print(ONION_SEVERITY_FATAL, "ERROR: Attempting to set invalid memory mode (0x%02x)\n", mode);
+#endif
 		return;
 	}
 	// send the command
@@ -235,16 +258,21 @@ int fastOledDriver::getMemoryMode() const {
 
 // set the OLED's cursor (according to character rows and dislay pixels)
 void fastOledDriver::setCursorByPixel(unsigned int row, unsigned int pixel) {
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_DEBUG, "> Setting cursor to row %d, pixel %d)\n", row, pixel);
-
+#endif
 	// check the inputs
 	if (row >= OLED_EXP_CHAR_ROWS) {
+#ifdef DEBUG
 		debuger.print(ONION_SEVERITY_FATAL, "ERROR: Attempting to set cursor to invalid row '%d'\n", row);
+#endif
 		return;
 	}
 	if (pixel >= OLED_EXP_WIDTH) {
+#ifdef DEBUG
 		debuger.print(ONION_SEVERITY_FATAL, "ERROR: Attempting to set cursor to invalid pixel '%d'\n", pixel);
-		return;
+#endif	
+	return;
 	}
 	//// set the cursor
 	// set page address
@@ -262,11 +290,15 @@ void fastOledDriver::setCursorByPixel(unsigned int row, unsigned int pixel) {
 void fastOledDriver::setColumnAddressing(unsigned int startPixel, unsigned int endPixel) {
 	// check the inputs
 	if (startPixel >= OLED_EXP_WIDTH || startPixel >= endPixel) {
+#ifdef DEBUG
 		debuger.print(ONION_SEVERITY_FATAL, "ERROR: Invalid start pixel (%d) for column address setup\n", startPixel);
+#endif
 		return;
 	}
 	if (endPixel >= OLED_EXP_WIDTH) {
+#ifdef DEBUG
 		debuger.print(ONION_SEVERITY_FATAL, "ERROR: Invalid end pixel (%d) for column address setup\n", endPixel);
+#endif
 		return;
 	}
 
@@ -299,7 +331,9 @@ void fastOledDriver::writeChar(const char c) {
 	if (charIndex >= 0 && charIndex < sizeof(asciiTable) / sizeof(asciiTable[0])) {
 		// write the data for the character
 		i2c_driver.write(OLED_EXP_REG_DATA, &asciiTable[charIndex][0], OLED_EXP_CHAR_LENGTH);
+#ifdef DEBUG
 		debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "\twriting '%c' to column %d\n", c, _cursorChar);
+#endif
 		// increment row cursor
 		_cursorChar = (_cursorChar == OLED_EXP_CHAR_COLUMNS - 1) ? 0 : _cursorChar+1;
 	}
@@ -309,7 +343,9 @@ void fastOledDriver::writeChar(const char c) {
 void fastOledDriver::write(const char *msg) {
 	int 	status;
 	int 	idx, i;
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_INFO, "> Writing '%s' to display\n", msg);
+#endif
 	// set addressing mode to page
 	//setMemoryMode(OLED_EXP_MEM_PAGE_ADDR_MODE);	// want automatic newlines enabled
 	// set column addressing to fit 126 characters that are 6 pixels wide
@@ -342,7 +378,6 @@ void fastOledDriver::write(const char *msg) {
 // write a buffer directly to the display
 void fastOledDriver::draw(uint8_t *buffer, int bytes) {
 	int 	idx;
-	debuger.print(ONION_SEVERITY_INFO, "> Writing buffer data to display\n");
 	// set the column addressing for the full width
 	setImageColumns();
 	// set addressing mode to horizontal (automatic newline at the end of each line)
@@ -371,7 +406,9 @@ void fastOledDriver::draw(uint8_t *buffer, int bytes) {
 //	1 			right
 void fastOledDriver::scroll(bool direction, int scrollSpeed, int startPage, int stopPage) {
 	int 	scrollMode;
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_INFO, "> Enabling horizontal scrolling to the %s\n", (direction == 1 ? "right" : "left"));
+#endif
 	// read the direction
 	if (direction) {
 		scrollMode = OLED_EXP_RIGHT_HORIZONTAL_SCROLL;
@@ -395,7 +432,9 @@ void fastOledDriver::scroll(bool direction, int scrollSpeed, int startPage, int 
 //	1 			right
 void fastOledDriver::scrollDiagonal(bool direction, int scrollSpeed, int fixedRows, int scrollRows, int verticalOffset, int startPage, int stopPage) {
 	int 	scrollMode;
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_INFO, "> Enabling diagonal scrolling to the %s\n", (direction == 1 ? "right" : "left"));
+#endif
 	// read the direction
 	if (direction) {
 		scrollMode = OLED_EXP_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL;
@@ -419,7 +458,9 @@ void fastOledDriver::scrollDiagonal(bool direction, int scrollSpeed, int fixedRo
 
 // disable scrolling
 void fastOledDriver::scrollStop() {
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_INFO, "> Disabling scrolling\n");
+#endif
 	// send the command
 	sendCommand(OLED_EXP_DEACTIVATE_SCROLL);
 }
@@ -433,7 +474,9 @@ void fastOledDriver::readLcdFile(char* file, uint8_t *buffer) {
 	// open the file
 	fp = fopen(file, "r");
 	if (fp == NULL) {
+#ifdef DEBUG
 		debuger.print(ONION_SEVERITY_FATAL, "ERROR: cannot open file '%s'\n", file);
+#endif
 		return;
 	}
 	// read each byte, add to the buffer
@@ -451,11 +494,15 @@ void fastOledDriver::readLcdData(char* data, uint8_t *buffer) {
 	int 	idx, i;
 	unsigned int	val;
 	//DBG
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "\n\n\ndata is of length %d, data:\n%s\n", strlen(data), data);
+#endif
 	// read each byte, add to the buffer
 	idx = 0;
 	while (sscanf(data, OLED_EXP_READ_LCD_STRING_OPT1, &val) > 0) {
+#ifdef DEBUG
 		debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "idx: %d, val: 0x%02x\n", idx, val);
+#endif
 		buffer[idx] = (uint8_t)val;
 		// advance the buffer index
 		idx++;
@@ -463,11 +510,13 @@ void fastOledDriver::readLcdData(char* data, uint8_t *buffer) {
 		memmove(data, data + 2, strlen(data));
 	}
 	//DBG
+#ifdef DEBUG
 	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "buffer: idx is %d, buffer: \n", idx);
 	for (i = 0; i < idx; i++) {
 		debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "idx: %d, 0x%02x\n", i, buffer[i]);
 	}
 	debuger.print(ONION_SEVERITY_DEBUG_EXTRA, "\n");
+#endif
 }
 
 // write a character to the buffer
