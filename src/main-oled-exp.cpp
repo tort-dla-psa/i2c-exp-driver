@@ -1,4 +1,6 @@
 #include <string>
+#include <sstream>
+#include <iomanip>
 #include <oled-exp.h>
 #include <onion-debug.h>
 
@@ -59,18 +61,20 @@ int commandExec(const std::string &command, const std::string &param)
 	// perform the specified command
 	dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "command = '%s', param = '%s'\n", command, param);
 	if (command == "write") {	
-		drv.write(param);
+		drv.write(param.c_str());
 	}else if (command == "writeByte") {
 		// parse the byte
 		uint8_t byte;
+		std::stringstream buff;
 		if (param[0] == '0' && param[1] == 'x') {
-			sscanf(param, "0x%02x", &byte);
+			buff << std::setfill('0') << std::setw(2) << std::hex << param.substr(2);
 		} else {
-			sscanf(param, "%02x", &byte);
+			buff << std::setfill('0') << std::setw(2) << std::hex << param;
 		}
+		buff >> byte;
 		drv.sendData(byte);
 	}else if (command == "brightness") {
-		drv.setBrightness( atoi(param) );
+		drv.setBrightness( std::atoi(param.c_str()) );
 	}else if (command == "invert") {
 		// interpret the parameter
 		val0 	= 0;	// off by default
@@ -88,19 +92,21 @@ int commandExec(const std::string &command, const std::string &param)
 	}else if (command == "dim") {
 		// interpret the parameter
 		val0 	= 0;	// off by default
-		if (strcmp(param, "on") == 0 ) {
+		if (param == "on") {
 			val0 = 1;
 		}
 		drv.setDim(val0);
 	}else if (command =="cursor") {
 		// interpret the parameter
-		sscanf(param, "%d, %d", &val0, &val1);
+		std::stringstream ss(param);
+		ss >> val0 >> val1;
 		dbg.print(ONION_SEVERITY_INFO, "> Setting cursor to (%d, %d)\n", val0, val1);
 		drv.setTextColumns();
 		drv.setCursor(val0, val1);
 	}else if (command == "cursorPixel") {
 		// interpret the parameter
-		sscanf(param, "%d, %d", &val0, &val1);
+		std::stringstream ss(param);
+		ss >> val0 >> val1;
 		dbg.print(ONION_SEVERITY_INFO, "> Setting cursor to row: %d, pixel: %d\n", val0, val1);
 		drv.setImageColumns();
 		drv.setCursorByPixel(val0, val1);
@@ -111,12 +117,12 @@ int commandExec(const std::string &command, const std::string &param)
 		memset(buffer, 0, OLED_EXP_WIDTH*OLED_EXP_HEIGHT/8 * sizeof *buffer);
 		// read the parameter
 		std::string identifyer = std::string(OLED_EXP_READ_LCD_DATA_IDENTIFIER);
-		if (param.compare(0,identifyer.length, identifyer){
+		if (param.compare(0,identifyer.length, identifyer)){
 			dbg.print(ONION_SEVERITY_INFO, "> Reading data from argument\n");
-			dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "  param length is %d\n", strlen(param) );
+			dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "  param length is %d\n", param.length );
 			// remove the data identifier from the string
 			param = param.substr(identifyer.length);
-			dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "  after move: param length is %d\n", strlen(param) );
+			dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "  after move: param length is %d\n", param.length );
 			// read the data into a buffer
 			drv.readLcdData(param.c_str(), buffer);
 		}else {
@@ -177,46 +183,42 @@ int commandExec(const std::string &command, const std::string &param)
 	return EXIT_SUCCESS;
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
 	dbg = fastDebuger(0);
 	drv = fastOledDriver();
-	std::string command,param;
+	std::string command, param;
 	int 	verbose;
 	int 	init;
 	int 	clear;
 	int 	ch;
 
 	// set the defaults
-	init 		= 0;
-	clear 		= 0;
-	verbose 	= ONION_VERBOSITY_NORMAL;
-	
-	// save the program name
-	progname 	= std::string(argv[0]);	
+	init = 0;
+	clear = 0;
+	verbose = ONION_VERBOSITY_NORMAL;
 
 	//// parse the option arguments
 	while ((ch = getopt(argc, argv, "vqhic")) != -1) {
 		switch (ch) {
-		case 'v':
-			// verbose output
-			verbose++;
-			break;
-		case 'q':
-			// quiet output
-			verbose = ONION_VERBOSITY_NONE;
-			break;
-		case 'i':
-			// perform init sequence
-			init 	= 1;
-			break;
-		case 'c':
-			// perform clear sequence
-			clear 	= 1;
-			break;
-		default:
-			usage(progname);
-			return 0;
+			case 'v':
+				// verbose output
+				verbose++;
+				break;
+			case 'q':
+				// quiet output
+				verbose = ONION_VERBOSITY_NONE;
+				break;
+			case 'i':
+				// perform init sequence
+				init = 1;
+				break;
+			case 'c':
+				// perform clear sequence
+				clear = 1;
+				break;
+			default:
+				usage();
+				return 0;
 		}
 	}
 
@@ -224,14 +226,14 @@ int main(int argc, char** argv)
 	dbg.setVerbosity(verbose);
 
 	// advance past the option arguments
-	argc 	-= optind;
-	argv	+= optind;
+	argc -= optind;
+	argv += optind;
 
 	// check if just option command
 	if (argc == 0) {
 		// check if usage needs to be printed
 		if (init == 0 && clear == 0) {
-			usage(progname);
+			usage();
 		}
 		return 0;
 	}
@@ -254,35 +256,34 @@ int main(int argc, char** argv)
 	// initialize display
 
 	// clear screen
-	if ( clear == 1 ) {
+	if (clear == 1) {
 		dbg.print(ONION_SEVERITY_INFO, "> Clearing display\n");
 		drv.clear();
 	}
 
 	//// parse the command arguments
-	while ( argc > 0 ) {
-		if(strlen(argv[0]) > MAX_COMMAND_LENGTH || strlen(argv[1]) > MAX_PARAM_LENGTH) {
+	while (argc > 0) {
+		if (strlen(argv[0]) > MAX_COMMAND_LENGTH || strlen(argv[1]) > MAX_PARAM_LENGTH) {
 			// FIXME: This error needs rewording. Also, the exit status should be less funny.
 			dbg.print(ONION_SEVERITY_FATAL, "Unsupported parameter length\n");
 			exit(13);
 		}
-		
+
 		// first arg - command
 		command = std::string(argv[0]);
 
 		// second arg - parameter (optional)
-		if ( argc > 1 ) {
+		if (argc > 1) {
 			param = std::string(argv[1]);
 		}
 
 		// perform the specified command
-		status 	= commandExec(command, param);
-		if (status != EXIT_SUCCESS) {
+		if (commandExec(command, param) != EXIT_SUCCESS) {
 			dbg.print(ONION_SEVERITY_FATAL, "ERROR: command '%s' failed!\n", command);
 		}
 		// decrement the number of arguments left
-		argc	-= 2;
-		argv	+= 2;
+		argc -= 2;
+		argv += 2;
 		dbg.print(ONION_SEVERITY_DEBUG, "> arguments remaining: %d\n", argc);
 	}
 	return 0;

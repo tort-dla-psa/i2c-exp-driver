@@ -467,7 +467,7 @@ void fastOledDriver::scrollStop() {
 
 //// reading lcd data ////
 // read a file with hex data 
-void fastOledDriver::readLcdFile(char* file, uint8_t *buffer) {
+void fastOledDriver::readLcdFile(const char* file, uint8_t *buffer) {
 	int 	idx;
 	FILE 	*fp;
 	unsigned int	val;

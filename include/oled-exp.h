@@ -259,7 +259,7 @@ public:
 	void	scroll(bool direction, int scrollSpeed, int startPage, int stopPage);
 	void	scrollDiagonal(bool direction, int scrollSpeed, int fixedRows, int scrollRows, int verticalOffset, int startPage, int stopPage);
 	void	scrollStop();
-	void	readLcdFile(char * file, uint8_t * buffer);
+	void	readLcdFile(const char * file, uint8_t * buffer);
 	void	readLcdData(const char * data, uint8_t * buffer);
 	void	printChar(char c);
 	void	lineScroll();
