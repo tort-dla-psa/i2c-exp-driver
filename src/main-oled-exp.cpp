@@ -1,14 +1,12 @@
+#include <string>
 #include <oled-exp.h>
 #include <onion-debug.h>
 
-// function prototypes:
-void 	Usage 				(const char* progName);
-int 	command 		(char *command, char *param);
 fastDebuger dbg;
 fastOledDriver drv;
 
 // print the usage info 
-void usage(const char* progName) 
+void usage() 
 {
 	dbg.print(ONION_SEVERITY_FATAL, "\n");
 	dbg.print(ONION_SEVERITY_FATAL, "Usage: oled-exp -i\n");
@@ -53,93 +51,78 @@ void usage(const char* progName)
 }
 
 // execute a specified command
-int commandExec(char *command, char *param)
+int commandExec(const std::string &command, const std::string &param)
 {
 	int 	val0, val1;
 	uint8_t	*buffer;
 
 	// perform the specified command
 	dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "command = '%s', param = '%s'\n", command, param);
-	if (strcmp(command, "write") == 0 ) {	
+	if (command == "write") {	
 		drv.write(param);
-	}
-	else if (strcmp(command, "writeByte") == 0 ) {	
+	}else if (command == "writeByte") {
 		// parse the byte
 		uint8_t byte;
 		if (param[0] == '0' && param[1] == 'x') {
 			sscanf(param, "0x%02x", &byte);
-		}
-		else {
+		} else {
 			sscanf(param, "%02x", &byte);
 		}
 		drv.sendData(byte);
-	}
-	else if (strcmp(command, "brightness") == 0 ) {
+	}else if (command == "brightness") {
 		drv.setBrightness( atoi(param) );
-	}
-	else if (strcmp(command, "invert") == 0 ) {
+	}else if (command == "invert") {
 		// interpret the parameter
 		val0 	= 0;	// off by default
-		if (strcmp(param, "on") == 0 ) {
+		if (param == "on") {
 			val0 = 1;
 		}
 		drv.setDisplayMode( val0 );
-	}
-	else if (strcmp(command, "power") == 0 ) {
+	}else if (command == "power") {
 		// interpret the parameter
 		val0 	= 0;	// off by default
-		if (strcmp(param, "on") == 0 ) {
+		if (param =="on") {
 			val0 = 1;
 		}
 		drv.setDisplayPower(val0);
-	}
-	else if (strcmp(command, "dim") == 0 ) {
+	}else if (command == "dim") {
 		// interpret the parameter
 		val0 	= 0;	// off by default
 		if (strcmp(param, "on") == 0 ) {
 			val0 = 1;
 		}
 		drv.setDim(val0);
-	}
-	else if (strcmp(command, "cursor") == 0 ) {
+	}else if (command =="cursor") {
 		// interpret the parameter
 		sscanf(param, "%d, %d", &val0, &val1);
 		dbg.print(ONION_SEVERITY_INFO, "> Setting cursor to (%d, %d)\n", val0, val1);
 		drv.setTextColumns();
 		drv.setCursor(val0, val1);
-	}
-	else if (strcmp(command, "cursorPixel") == 0 ) {
+	}else if (command == "cursorPixel") {
 		// interpret the parameter
 		sscanf(param, "%d, %d", &val0, &val1);
 		dbg.print(ONION_SEVERITY_INFO, "> Setting cursor to row: %d, pixel: %d\n", val0, val1);
 		drv.setImageColumns();
 		drv.setCursorByPixel(val0, val1);
-	}
-	else if (strcmp(command, "draw") == 0 ) {
+	}else if (command == "draw") {
 		// allocate memory for the buffer
-		buffer 	= (uint8_t*) malloc(OLED_EXP_WIDTH*OLED_EXP_HEIGHT/8 * sizeof *buffer);
-		
-		memset(buffer, 0, OLED_EXP_WIDTH*OLED_EXP_HEIGHT/8 * sizeof *buffer); // FIXME: We should definitely do a #define for the buffer size calculation. This looks ugly.
-
+		buffer 	= new uint8_t[OLED_EXP_WIDTH*OLED_EXP_HEIGHT/8];
+		// FIXME: We should definitely do a #define for the buffer size calculation. This looks ugly.
+		memset(buffer, 0, OLED_EXP_WIDTH*OLED_EXP_HEIGHT/8 * sizeof *buffer);
 		// read the parameter
-		if ( strncmp(param, OLED_EXP_READ_LCD_DATA_IDENTIFIER, strlen(OLED_EXP_READ_LCD_DATA_IDENTIFIER) ) == 0 ) {
+		std::string identifyer = std::string(OLED_EXP_READ_LCD_DATA_IDENTIFIER);
+		if (param.compare(0,identifyer.length, identifyer){
 			dbg.print(ONION_SEVERITY_INFO, "> Reading data from argument\n");
-
 			dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "  param length is %d\n", strlen(param) );
 			// remove the data identifier from the string
-			memmove	(	param, 
-						param + strlen(OLED_EXP_READ_LCD_DATA_IDENTIFIER), 
-						strlen(param) 
-					);
+			param = param.substr(identifyer.length);
 			dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "  after move: param length is %d\n", strlen(param) );
-
 			// read the data into a buffer
-			drv.readLcdData(param, buffer);
-		}
-		else {
+			drv.readLcdData(param.c_str(), buffer);
+		}else {
 			// read data from a file
 			dbg.print(ONION_SEVERITY_INFO, "> Reading data from file '%s'\n", param);
-			drv.readLcdFile(param, buffer);
+			drv.readLcdFile(param.c_str(), buffer);
 		}
 
 		drv.draw(buffer, OLED_EXP_WIDTH*OLED_EXP_HEIGHT/8);
@@ -151,38 +134,32 @@ int commandExec(char *command, char *param)
 		// deallocate memory for the buffer
 		if (buffer != NULL) {
 			dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "> Deallocating buffer array\n");
-			free(buffer);
+			delete[] buffer;
 		}
-	}
-	else if (strcmp(command, "scroll") == 0 ) {
+	}else if (command == "scroll") {
 		// interpret the parameters
 		val0 		= -1;
 		val1 		= -1;
-		if (strcmp(param, "left") == 0) {
+		if (param == "left") {
 			val0 	= 0;	// horizontal scrolling
 			val1	= 0;	// scrolling left
-		}
-		else if (strcmp(param, "right") == 0) {
+		}else if (param == "right") {
 			val0 	= 0;	// horizontal scrolling
 			val1	= 1;	// scrolling right
-		}
-		else if (strcmp(param, "diagonal-left") == 0) {
+		}else if (param == "diagonal-left") {
 			val0 	= 1;	// vertical scrolling
 			val1	= 0;	// scrolling up
-		}
-		else if (strcmp(param, "diagonal-right") == 0) {
+		}else if (param == "diagonal-right") {
 			val0 	= 1;	// vertical scrolling
 			val1	= 1;	// scrolling down
 		}
 
 		if (val0 == -1) {
 			drv.scrollStop();
-		}
-		else if (val0 == 0) {
+		}else if (val0 == 0) {
 			// horizontal scrolling
 			drv.scroll(val1, OLED_EXP_SCROLL_SPEED_5_FRAMES, 0, OLED_EXP_CHAR_ROWS-1);
-		}
-		else if (val0 == 1) {
+		}else if (val0 == 1) {
 			// diagonal scrolling
 			drv.scrollDiagonal (	val1, 								// direction
 											OLED_EXP_SCROLL_SPEED_5_FRAMES, 	// scroll speed
@@ -193,11 +170,10 @@ int commandExec(char *command, char *param)
 											OLED_EXP_CHAR_ROWS-1				// horizontal end page	
 										);
 		}
-	}
-	else {
+	}else {
 		dbg.print(ONION_SEVERITY_FATAL, "> Unrecognized command '%s'\n", command );
+		return EXIT_FAILURE;
 	}
-
 	return EXIT_SUCCESS;
 }
 
@@ -205,28 +181,19 @@ int main(int argc, char** argv)
 {
 	dbg = fastDebuger(0);
 	drv = fastOledDriver();
-	const char *progname;
-	char 	*command;
-	char 	*param;
-	
-	int 	status;
+	std::string command,param;
 	int 	verbose;
 	int 	init;
 	int 	clear;
 	int 	ch;
 
-
 	// set the defaults
 	init 		= 0;
 	clear 		= 0;
 	verbose 	= ONION_VERBOSITY_NORMAL;
-
-	command 	= (char*)malloc(MAX_COMMAND_LENGTH * sizeof *command);
-	param 		= (char*)malloc(MAX_PARAM_LENGTH * sizeof *param);
-
+	
 	// save the program name
-	progname 	= argv[0];	
-
+	progname 	= std::string(argv[0]);	
 
 	//// parse the option arguments
 	while ((ch = getopt(argc, argv, "vqhic")) != -1) {
@@ -256,48 +223,41 @@ int main(int argc, char** argv)
 	// set the verbosity
 	dbg.setVerbosity(verbose);
 
-
 	// advance past the option arguments
 	argc 	-= optind;
 	argv	+= optind;
 
-
-	//// OLED PROGRAMMING
-	// check if OLED Expansion is present
-	// exit the app if i2c reads fail
-	if (drv.checkInit() == false) {
-		dbg.print(ONION_SEVERITY_FATAL, "> ERROR: OLED Expansion not found!\n");
-		return 0;
-	}
-
-
-	// initialize display
-	if ( init == 1 ) {
-		drv.init();
-		if (drv.checkInit() == false) {
-			dbg.print(ONION_SEVERITY_FATAL, "main-oled-exp:: display init failed!\n");
-		}
-	}
-
-	// clear screen
-	if ( clear == 1 ) {
-		dbg.print(ONION_SEVERITY_INFO, "> Clearing display\n");
-		drv.clear();
-		/*if (status == EXIT_FAILURE) {
-			dbg.print(ONION_SEVERITY_FATAL, "main-oled-exp:: display clear failed!\n");
-		}*/
-	}
-
-
 	// check if just option command
-	if ( argc == 0 ) {
+	if (argc == 0) {
 		// check if usage needs to be printed
-		if ( init == 0 && clear == 0) {
+		if (init == 0 && clear == 0) {
 			usage(progname);
 		}
 		return 0;
 	}
 
+	//// OLED PROGRAMMING
+	// check if OLED Expansion is present
+	// exit the app if i2c reads fail
+
+	if (init == 1) {
+		drv.init();
+		if (drv.checkInit() == false) {
+			dbg.print(ONION_SEVERITY_FATAL, "main-oled-exp:: display init failed!\n");
+		}
+	} else {
+		if (drv.checkInit() == false) {
+			dbg.print(ONION_SEVERITY_FATAL, "> ERROR: OLED Expansion not found!\n");
+			return 0;
+		}
+	}
+	// initialize display
+
+	// clear screen
+	if ( clear == 1 ) {
+		dbg.print(ONION_SEVERITY_INFO, "> Clearing display\n");
+		drv.clear();
+	}
 
 	//// parse the command arguments
 	while ( argc > 0 ) {
@@ -308,11 +268,11 @@ int main(int argc, char** argv)
 		}
 		
 		// first arg - command
-		strcpy(command, argv[0]);
+		command = std::string(argv[0]);
 
 		// second arg - parameter (optional)
 		if ( argc > 1 ) {
-			strcpy(param, argv[1]);
+			param = std::string(argv[1]);
 		}
 
 		// perform the specified command
@@ -320,14 +280,10 @@ int main(int argc, char** argv)
 		if (status != EXIT_SUCCESS) {
 			dbg.print(ONION_SEVERITY_FATAL, "ERROR: command '%s' failed!\n", command);
 		}
-
 		// decrement the number of arguments left
 		argc	-= 2;
 		argv	+= 2;
-
 		dbg.print(ONION_SEVERITY_DEBUG, "> arguments remaining: %d\n", argc);
 	}
-
-
 	return 0;
 }

@@ -490,7 +490,7 @@ void fastOledDriver::readLcdFile(char* file, uint8_t *buffer) {
 }
 
 // read hex data from a string
-void fastOledDriver::readLcdData(char* data, uint8_t *buffer) {
+void fastOledDriver::readLcdData(const char* data, uint8_t *buffer) {
 	int 	idx, i;
 	unsigned int	val;
 	//DBG

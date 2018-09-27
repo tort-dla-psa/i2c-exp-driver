@@ -139,7 +139,6 @@ int validateArgumentsPeriodMode(int channel, float periodOn, float periodTotal, 
 
 int main(int argc, char** argv)
 {
-	const char 	*progname;
 	int 		status;
 	int 		mode;
 	int 		verbose;
@@ -158,9 +157,6 @@ int main(int argc, char** argv)
 
 	frequency 	= PWM_FREQUENCY_DEFAULT;
 	delay 		= 0.0f;	// default value
-
-	// save the program name
-	progname = argv[0];	
 
 	//// parse the option arguments
 	while ((ch = getopt(argc, argv, "vqhipsf:")) != -1) {
@@ -190,7 +186,7 @@ int main(int argc, char** argv)
 			mode  	= MAIN_PWM_EXP_SLEEP_MODE;
 			break;
 		default:
-			usage(progname);
+			usage();
 			return 0;
 		}
 	}
@@ -229,7 +225,7 @@ int main(int argc, char** argv)
 	{
 		// ensure correct number of arguments
 		if ( argc != 2 && argc != 3 ) {
-			usage(progname);
+			usage();
 			onionPrint(ONION_SEVERITY_FATAL, "ERROR: invalid amount of arguments!\n");
 			return 0;
 		}
@@ -257,7 +253,7 @@ int main(int argc, char** argv)
 	{
 		// ensure correct number of arguments
 		if ( argc != 3 ) {
-			usage(progname);
+			usage();
 			onionPrint(ONION_SEVERITY_FATAL, "ERROR: invalid amount of arguments!\n");
 			return 0;
 		}
