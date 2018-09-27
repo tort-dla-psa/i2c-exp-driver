@@ -251,7 +251,7 @@ bool fastI2CDriver::read(uint8_t addr, uint8_t * buffer, int numBytes) {
 #ifdef I2C_ENABLED
 		// read from the i2c device
 		size = numBytes;
-		if (read(fd, buffer, size) != size) {
+		if (::read(fd, buffer, size) != size) {
 			debuger.print(ONION_SEVERITY_FATAL, "%s read issue for register 0x%02x, errno is %d: %s\n", I2C_PRINT_BANNER, addr, errno, strerror(errno));
 			status = false;
 		} else {
