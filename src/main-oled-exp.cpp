@@ -53,7 +53,7 @@ void usage(const char* progName)
 }
 
 // execute a specified command
-int command(char *command, char *param)
+int commandExec(char *command, char *param)
 {
 	int 	val0, val1;
 	uint8_t	*buffer;
@@ -71,7 +71,7 @@ int command(char *command, char *param)
 		else {
 			sscanf(param, "%02x", &val0);
 		}
-		drv.writeByte(val0);
+		drv.sendData(val0);
 	}
 	else if (strcmp(command, "brightness") == 0 ) {
 		drv.setBrightness( atoi(param) );
@@ -116,7 +116,7 @@ int command(char *command, char *param)
 	}
 	else if (strcmp(command, "draw") == 0 ) {
 		// allocate memory for the buffer
-		buffer 	= malloc(OLED_EXP_WIDTH*OLED_EXP_HEIGHT/8 * sizeof *buffer);
+		buffer 	= (uint8_t*) malloc(OLED_EXP_WIDTH*OLED_EXP_HEIGHT/8 * sizeof *buffer);
 		
 		memset(buffer, 0, OLED_EXP_WIDTH*OLED_EXP_HEIGHT/8 * sizeof *buffer); // FIXME: We should definitely do a #define for the buffer size calculation. This looks ugly.
 
@@ -220,8 +220,8 @@ int main(int argc, char** argv)
 	clear 		= 0;
 	verbose 	= ONION_VERBOSITY_NORMAL;
 
-	command 	= malloc(MAX_COMMAND_LENGTH * sizeof *command);
-	param 		= malloc(MAX_PARAM_LENGTH * sizeof *param);
+	command 	= (char*)malloc(MAX_COMMAND_LENGTH * sizeof *command);
+	param 		= (char*)malloc(MAX_PARAM_LENGTH * sizeof *param);
 
 	// save the program name
 	progname 	= argv[0];	
@@ -253,7 +253,7 @@ int main(int argc, char** argv)
 	}
 
 	// set the verbosity
-	onionSetVerbosity(verbose);
+	dbg.setVerbosity(verbose);
 
 
 	// advance past the option arguments
@@ -315,7 +315,7 @@ int main(int argc, char** argv)
 		}
 
 		// perform the specified command
-		status 	= command(command, param);
+		status 	= commandExec(command, param);
 		if (status != EXIT_SUCCESS) {
 			dbg.print(ONION_SEVERITY_FATAL, "ERROR: command '%s' failed!\n", command);
 		}
