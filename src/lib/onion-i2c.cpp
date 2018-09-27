@@ -76,7 +76,7 @@ bool fastI2CDriver::_write(const uint8_t * buffer, int size) {
 	// perform the write
 	if (write_possible) {
 		// write to the i2c device
-		if (write(fd, buffer, size) != size) {
+		if (::write(fd, buffer, size) != size) {
 			debuger.print(ONION_SEVERITY_FATAL, "%s write issue for register 0x%02x, errno is %d: %s\n", I2C_PRINT_BANNER, buffer[0], errno, strerror(errno));
 			return false;
 		}
