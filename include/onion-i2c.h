@@ -29,7 +29,7 @@
 #endif
 
 #ifdef DEBUG
-#include "onion-debug.h"
+#include <onion-debug.h>
 #endif
 
 class fastI2CDriver {

@@ -1,4 +1,4 @@
-#include "../../include/onion-debug.h"
+#include <onion-debug.h>
 
 fastDebuger::fastDebuger() :verbosityLevel(-1) {}
 fastDebuger::fastDebuger(int verbosityLevel) : verbosityLevel(verbosityLevel) {}

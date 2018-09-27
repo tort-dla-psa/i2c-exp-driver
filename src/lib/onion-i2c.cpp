@@ -1,4 +1,4 @@
-#include "../../include/onion-i2c.h"
+#include <onion-i2c.h>
 
 bool fastI2CDriver::_getFd(int adapterNum) {
 	int 	status;

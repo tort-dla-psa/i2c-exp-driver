@@ -1,5 +1,5 @@
-#include "../include/onion-i2c.h"
-#include "../include/oled-exp.h"
+#include <onion-i2c.h>
+#include <oled-exp.h>
 
 fastOledDriver::fastOledDriver()
 	:i2c_driver(OLED_EXP_DEVICE_NUM, OLED_EXP_ADDR)

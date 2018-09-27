@@ -9,9 +9,9 @@
 
 
 #ifdef DEBUG
-#include "onion-debug.h"
+#include <onion-debug.h>
 #endif
-#include "onion-i2c.h"
+#include <onion-i2c.h>
 
 // Constants
 #define OLED_EXP_ADDR 					0x3C
