@@ -238,12 +238,12 @@ public:
 	void	draw();
 	void	clear();
 	void	setDisplayMode(bool bInvert);
-	void	sendCommand(uint8_t command);
+	inline void	sendCommand(uint8_t command);
 	void	setCursor(unsigned int row, unsigned int column);
-	void	sendData(uint8_t data);
+	inline void	sendData(uint8_t data);
 	void	setDisplayPower(bool bPowerOn);
 	void	setBrightness(unsigned int brightness);
-	unsigned int getBrightness() const;
+	inline unsigned int getBrightness() const;
 	void	setDim(bool dim);
 	bool	getDim() const;
 	bool	checkInit();
