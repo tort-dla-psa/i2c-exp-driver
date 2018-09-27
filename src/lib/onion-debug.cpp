@@ -7,11 +7,11 @@ fastDebuger::fastDebuger(const fastDebuger & src) {
 }
 fastDebuger::~fastDebuger() {}
 
-inline void fastDebuger::setVerbosity (int verbosityLevel) {
+void fastDebuger::setVerbosity (int verbosityLevel) {
 	this->verbosityLevel = verbosityLevel;
 }
 
-inline int fastDebuger::getVerbosity () const {
+ int fastDebuger::getVerbosity () const {
 	return verbosityLevel;
 }
 

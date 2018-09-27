@@ -110,7 +110,7 @@ void fastOledDriver::setDisplayMode(bool bInvert) {
 	sendCommand(bInvert ? OLED_EXP_NORMAL_DISPLAY : OLED_EXP_INVERT_DISPLAY);
 }
 
-inline void fastOledDriver::sendCommand(uint8_t command) {
+void fastOledDriver::sendCommand(uint8_t command) {
 	i2c_driver.write(OLED_EXP_REG_COMMAND, &command, 1);
 }
 
@@ -162,7 +162,7 @@ void fastOledDriver::setCursor(unsigned int row, unsigned int column) {
 	sendCommand(OLED_EXP_SET_HIGH_COLUMN + ((OLED_EXP_CHAR_LENGTH * column >> 4) & 0x0F));
 }
 
-inline void fastOledDriver::sendData(uint8_t data) {
+void fastOledDriver::sendData(uint8_t data) {
 	i2c_driver.write(OLED_EXP_REG_DATA, data);
 }
 
@@ -197,7 +197,7 @@ void fastOledDriver::setBrightness(unsigned int brightness) {
 	sendCommand(brightness);
 }
 
-inline unsigned int fastOledDriver::getBrightness() const {
+ unsigned int fastOledDriver::getBrightness() const {
 	return brightness;
 }
 

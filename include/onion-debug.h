@@ -23,8 +23,8 @@ public:
 	fastDebuger(const fastDebuger &src);
 	~fastDebuger();
 	// debug functions
-	inline void 	setVerbosity(int verbosityLevel);
-	inline int 	getVerbosity() const;
+	void 	setVerbosity(int verbosityLevel);
+	int 	getVerbosity() const;
 	void 	print(int severity, const char* msg, ...);
 	void	operator = (const fastDebuger &rhs);
 	bool	operator == (const fastDebuger &rhs);

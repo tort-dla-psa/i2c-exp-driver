@@ -127,37 +127,37 @@ fastI2CDriver::~fastI2CDriver() {
 	_releaseFd();
 }
 #ifdef DEBUG
-inline void fastI2CDriver::setDebuger(fastDebuger debuger) {
+void fastI2CDriver::setDebuger(fastDebuger debuger) {
 	this->debuger = debuger;
 }
 
-inline fastDebuger fastI2CDriver::getDebuger() const {
+ fastDebuger fastI2CDriver::getDebuger() const {
 	return debuger;
 }
 #endif
-inline bool fastI2CDriver::setDevice(int devNum) {
+ bool fastI2CDriver::setDevice(int devNum) {
 	this->devNum = devNum;
 	return _getFd(devNum);
 }
 
-inline int fastI2CDriver::getDevice() const {
+ int fastI2CDriver::getDevice() const {
 	return devNum;
 }
 
-inline bool fastI2CDriver::setDevAddr(uint8_t devAddr) {
+ bool fastI2CDriver::setDevAddr(uint8_t devAddr) {
 	this->devAddr = devAddr;
 	return _setDevice(devAddr);
 }
 
-inline uint8_t fastI2CDriver::getDevAddr() const {
+ uint8_t fastI2CDriver::getDevAddr() const {
 	return devAddr;
 }
 
-inline void fastI2CDriver::setAddr(int addr) {
+void fastI2CDriver::setAddr(int addr) {
 	this->addr = addr;
 }
 
-inline uint8_t fastI2CDriver::getAddr() const {
+ uint8_t fastI2CDriver::getAddr() const {
 	return addr;
 }
 
@@ -176,7 +176,7 @@ bool fastI2CDriver::write(const uint8_t addr, const uint8_t * buffer, int size) 
 	return status;
 }
 
-inline bool fastI2CDriver::write(const uint8_t * buffer, int size) {
+ bool fastI2CDriver::write(const uint8_t * buffer, int size) {
 	return _write(buffer, size);
 }
 
@@ -206,7 +206,7 @@ bool fastI2CDriver::write(uint8_t addr, int val) {
 	return write(buffer, size);
 }
 
-inline bool fastI2CDriver::write(int val) {
+ bool fastI2CDriver::write(int val) {
 	return write(addr,val);
 }
 
@@ -232,7 +232,7 @@ bool fastI2CDriver::writeBytes(uint8_t addr, int val, int numBytes) {
 	return _write(buffer, size);
 }
 
-inline bool fastI2CDriver::writeBytes(int val, int numBytes) {
+ bool fastI2CDriver::writeBytes(int val, int numBytes) {
 	return writeBytes(addr,val,numBytes);
 }
 
@@ -292,7 +292,7 @@ bool fastI2CDriver::read(uint8_t addr, uint8_t * buffer, int numBytes) {
 	// release the device file handle
 	return status;
 }
-inline bool fastI2CDriver::read(uint8_t * buffer, int numBytes) {
+ bool fastI2CDriver::read(uint8_t * buffer, int numBytes) {
 	return read(addr, buffer, numBytes);
 }
 bool fastI2CDriver::readByte(uint8_t addr, int * val) {
@@ -307,7 +307,7 @@ bool fastI2CDriver::readByte(uint8_t addr, int * val) {
 	return (status);
 }
 
-inline bool fastI2CDriver::readByte(int * val) {
+ bool fastI2CDriver::readByte(int * val) {
 	return readByte(addr, val);
 }
 
