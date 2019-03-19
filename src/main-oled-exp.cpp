@@ -8,8 +8,7 @@ fastDebuger dbg;
 fastOledDriver drv;
 
 // print the usage info 
-void usage() 
-{
+void usage() {
 	dbg.print(ONION_SEVERITY_FATAL, "\n");
 	dbg.print(ONION_SEVERITY_FATAL, "Usage: oled-exp -i\n");
 	dbg.print(ONION_SEVERITY_FATAL, "\n");
@@ -53,13 +52,13 @@ void usage()
 }
 
 // execute a specified command
-int commandExec(const std::string &command, const std::string &param)
-{
+int commandExec(const std::string &command, std::string param) {
 	int 	val0, val1;
 	uint8_t	*buffer;
 
 	// perform the specified command
-	dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "command = '%s', param = '%s'\n", command, param);
+	dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "command = '%s', param = '%s'\n",
+			command.c_str(), param.c_str());
 	if (command == "write") {	
 		drv.write(param.c_str());
 	}else if (command == "writeByte") {
@@ -117,17 +116,18 @@ int commandExec(const std::string &command, const std::string &param)
 		memset(buffer, 0, OLED_EXP_WIDTH*OLED_EXP_HEIGHT/8 * sizeof *buffer);
 		// read the parameter
 		std::string identifyer = std::string(OLED_EXP_READ_LCD_DATA_IDENTIFIER);
-		if (param.compare(0,identifyer.length, identifyer)){
+		if (param.compare(0,identifyer.length(), identifyer)){
 			dbg.print(ONION_SEVERITY_INFO, "> Reading data from argument\n");
-			dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "  param length is %d\n", param.length );
+			dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "  param length is %d\n", param.length() );
 			// remove the data identifier from the string
-			param = param.substr(identifyer.length);
-			dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "  after move: param length is %d\n", param.length );
+			param = param.substr(identifyer.length());
+			dbg.print(ONION_SEVERITY_DEBUG_EXTRA, "  after move: param length is %d\n", param.length() );
 			// read the data into a buffer
-			drv.readLcdData(param.c_str(), buffer);
+			char* temp = (char*)param.c_str();
+			drv.readLcdData(temp, buffer);
 		}else {
 			// read data from a file
-			dbg.print(ONION_SEVERITY_INFO, "> Reading data from file '%s'\n", param);
+			dbg.print(ONION_SEVERITY_INFO, "> Reading data from file '%s'\n", param.c_str());
 			drv.readLcdFile(param.c_str(), buffer);
 		}
 
@@ -177,7 +177,7 @@ int commandExec(const std::string &command, const std::string &param)
 										);
 		}
 	}else {
-		dbg.print(ONION_SEVERITY_FATAL, "> Unrecognized command '%s'\n", command );
+		dbg.print(ONION_SEVERITY_FATAL, "> Unrecognized command '%s'\n", command.c_str());
 		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;
@@ -279,7 +279,7 @@ int main(int argc, char** argv) {
 
 		// perform the specified command
 		if (commandExec(command, param) != EXIT_SUCCESS) {
-			dbg.print(ONION_SEVERITY_FATAL, "ERROR: command '%s' failed!\n", command);
+			dbg.print(ONION_SEVERITY_FATAL, "ERROR: command '%s' failed!\n", command.c_str());
 		}
 		// decrement the number of arguments left
 		argc -= 2;

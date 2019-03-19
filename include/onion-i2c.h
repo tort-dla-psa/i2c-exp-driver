@@ -29,7 +29,7 @@
 #endif
 
 #ifdef DEBUG
-#include <onion-debug.h>
+#include "onion-debug.h"
 #endif
 
 class fastI2CDriver {
@@ -50,25 +50,25 @@ public:
 	~fastI2CDriver();
 #ifdef DEBUG
 	fastI2CDriver(int devNum, uint8_t devAddr, fastDebuger debuger);
-	void	setDebuger(fastDebuger debuger);
-	fastDebuger		getDebuger() const;
+	void setDebuger(fastDebuger debuger);
+	fastDebuger getDebuger() const;
 #endif
-	bool	setDevice(int devNum);
-	int		getDevice() const;
-	bool	setDevAddr(uint8_t devAddr);
-	uint8_t	getDevAddr() const;
-	void	setAddr(int addr);
-	uint8_t	getAddr() const;
-	bool 	write(uint8_t addr, const uint8_t *buffer, int size);
-	bool 	write(const uint8_t *buffer, int size);
-	bool 	write(uint8_t addr, int val);
-	bool 	write(int val);
-	bool 	writeBytes(uint8_t addr, int val, int numBytes);
-	bool 	writeBytes(int val, int numBytes);
-	bool 	read(uint8_t addr, uint8_t *buffer, int numBytes);
-	bool 	read(uint8_t *buffer, int numBytes);
-	bool 	readByte(uint8_t addr, int *val);
-	bool 	readByte(int *val);
-	bool	operator == (const fastI2CDriver &rhs);
+	bool setDevice(int devNum);
+	int  getDevice() const;
+	bool setDevAddr(uint8_t devAddr);
+	uint8_t getDevAddr() const;
+	void setAddr(int addr);
+	uint8_t getAddr() const;
+	bool write(uint8_t addr, const uint8_t *buffer, int size);
+	bool write(const uint8_t *buffer, int size);
+	bool write(uint8_t addr, int val);
+	bool write(int val);
+	bool writeBytes(uint8_t addr, int val, int numBytes);
+	bool writeBytes(int val, int numBytes);
+	bool read(uint8_t addr, uint8_t *buffer, int numBytes);
+	bool read(uint8_t *buffer, int numBytes);
+	bool readByte(uint8_t addr, int *val);
+	bool readByte(int *val);
+	bool operator == (const fastI2CDriver &rhs);
 };
 #endif // _ONION_I2C_H_
