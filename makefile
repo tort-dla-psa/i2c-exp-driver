@@ -8,9 +8,8 @@ blddir := build
 bindir := bin
 libdir := lib
 
-
 # define common variables
-srcext := c
+srcext := cpp
 sources := $(shell find $(srcdir) -maxdepth 1 -type f \( -iname "*.$(srcext)" ! -iname "*main-*.$(srcext)" \) )
 objects := $(patsubst $(srcdir)/%, $(blddir)/%, $(sources: .$(srcext)=.o))
 extra =
@@ -36,20 +35,20 @@ TARGET_LIB0 := $(libdir)/$(LIB0).so
 LIB_LIB0 := -L$(libdir) -loniondebug
 
 LIB1 := libonionmcp23008
-SOURCE_LIB1 := src/lib/onion-mcp23008-driver.cpp
-OBJECT_LIB1 := $(patsubst $(srcdir)/%,$(blddir)/%,$(SOURCE_LIB1:.cpp=.o))
+SOURCE_LIB1 := src/lib/onion-mcp23008-driver.$(srcext)
+OBJECT_LIB1 := $(patsubst $(srcdir)/%,$(blddir)/%,$(SOURCE_LIB1:.$(srcext)=.o))
 TARGET_LIB1 := $(libdir)/$(LIB1).so
 LIB_LIB1 := -L$(libdir) -loniondebug -lonioni2c
 
 LIB2 := libonionpwmexp
-SOURCE_LIB2 := src/pwm-exp.cpp
-OBJECT_LIB2 := $(patsubst $(srcdir)/%,$(blddir)/%,$(SOURCE_LIB2:.cpp=.o))
+SOURCE_LIB2 := src/pwm-exp.$(srcext)
+OBJECT_LIB2 := $(patsubst $(srcdir)/%,$(blddir)/%,$(SOURCE_LIB2:.$(srcext)=.o))
 TARGET_LIB2 := $(libdir)/$(LIB2).so
 LIB_LIB2 := -L$(libdir) -loniondebug -lonioni2c
 
 LIB3 := libonionrelayexp
-SOURCE_LIB3 := src/relay-exp.cpp
-OBJECT_LIB3 := $(patsubst $(srcdir)/%,$(blddir)/%,$(SOURCE_LIB3:.cpp=.o))
+SOURCE_LIB3 := src/relay-exp.$(srcext)
+OBJECT_LIB3 := $(patsubst $(srcdir)/%,$(blddir)/%,$(SOURCE_LIB3:.$(srcext)=.o))
 TARGET_LIB3 := $(libdir)/$(LIB3).so
 LIB_LIB3 := -L$(libdir) -loniondebug -lonioni2c -lonionmcp23008
 
@@ -62,20 +61,17 @@ LIB_LIB4 := -L$(libdir) -loniondebug -lonioni2c
 
 # C applications
 APP0 := pwm-exp
-SOURCE_APP0 := $(srcdir)/main-$(APP0).cpp
-OBJECT_APP0 := $(patsubst $(srcdir)/%,$(blddir)/%,$(SOURCE_APP0:.cpp=.o))
+SOURCE_APP0 := $(srcdir)/main-$(APP0).$(srcext)
 LIB_APP0 := -L$(libdir) -loniondebug -lonioni2c -lonionpwmexp
 TARGET_APP0 := $(bindir)/$(APP0)
 
 APP1 := relay-exp
-SOURCE_APP1 := $(srcdir)/main-$(APP1).cpp
-OBJECT_APP1 := $(patsubst $(srcdir)/%,$(blddir)/%,$(SOURCE_APP1:.cpp=.o))
+SOURCE_APP1 := $(srcdir)/main-$(APP1).$(srcext)
 LIB_APP1 := -L$(libdir) -loniondebug -lonioni2c -lonionmcp23008 -lonionrelayexp
 TARGET_APP1 := $(bindir)/$(APP1)
 
 APP2 := oled-exp
 SOURCE_APP2 := $(srcdir)/main-$(APP2).$(srcext) $(srcdir)/$(APP2).$(srcext)
-OBJECT_APP2 := $(patsubst $(srcdir)/%,$(blddir)/%,$(SOURCE_APP2:.$(srcext)=.o))
 LIB_APP2 := -L$(libdir) -loniondebug -lonioni2c -lonionoledexp
 TARGET_APP2 := $(bindir)/$(APP2)
 
@@ -143,23 +139,23 @@ $(TARGET_LIB4): $(OBJECT_LIB4)
 
 
 # application binaries
-$(TARGET_APP0): $(OBJECT_APP0)
+$(TARGET_APP0): $(SOURCE_APP0)
 	@echo " Compiling $(APP0)"
 	@mkdir -p $(bindir)
 	@echo " Linking..."
-	$(cxx) $^ $(cflags) $(LDFLAGS) -o $(TARGET_APP0) $(LIB) $(LIB_APP0)
+	$(cxx) $^ $(cflags) $(LDFLAGS) -o $(TARGET_APP0) $(LIB) $(LIB_APP0) -I$(incdir)
 
-$(TARGET_APP1): $(OBJECT_APP1)
+$(TARGET_APP1): $(SOURCE_APP1)
 	@echo " Compiling $(APP1)"
 	@mkdir -p $(bindir)
 	@echo " Linking..."
-	$(cxx) $^ $(cflags) $(LDFLAGS) -o $(TARGET_APP1) $(LIB) $(LIB_APP1)
+	$(cxx) $^ $(cflags) $(LDFLAGS) -o $(TARGET_APP1) $(LIB) $(LIB_APP1) -I$(incdir)
 
-$(TARGET_APP2): $(OBJECT_APP2)
+$(TARGET_APP2): $(SOURCE_APP2)
 	@echo " Compiling $(APP2)"
 	@mkdir -p $(bindir)
 	@echo " Linking..."
-	$(cxx) $^ $(cflags) $(LDFLAGS) -o $(TARGET_APP2) $(LIB) $(LIB_APP2)
+	$(cxx) $^ $(cflags) $(LDFLAGS) -o $(TARGET_APP2) $(LIB) $(LIB_APP2) -I$(incdir)
 
 
 $(TARGET_PYLIB00): $(OBJECT_PYLIB00)
@@ -186,11 +182,10 @@ $(TARGET_PYLIB2): $(OBJECT_PYLIB2)
 # generic: build any object file required
 $(blddir)/%.o: $(srcdir)/%.$(srcext)
 	@mkdir -p $(dir $@)
-	@echo " $(cxx) $(cflags) $(inc) -c -o $@ $<"; $(cxx) $(cflags) $(inc) -c -o $@ $<
-
-$(blddir)/%.o: $(srcdir)/%.cpp
-	@mkdir -p $(dir $@)
-	@echo " $(cxx) $(cflags) $(inc) -c -o $@ $<"; $(cxx) $(cflags) $(inc) -c -o $@ $<
+	@echo "compile $< $@"
+	@if [ $< != "$(srcdir)/main-*.$(srcext)" ]; \
+	then $(cxx) $(cflags) $(inc) -c -o $@ $<; \
+	fi
 
 clean:
 	@echo " Cleaning..."; 
@@ -219,10 +214,10 @@ prepare:
 	mkdir -p $(blddir)/lib $(bindir) $(libdir)
 # Tests
 tester:
-	$(cxx) $(cflags) test/tester.cpp $(inc) $(LIB) -o bin/tester
+	$(cxx) $(cflags) test/tester.$(srcext) $(inc) $(LIB) -o bin/tester
 
 # Spikes
 #ticket:
-#  $(cxx) $(cflags) spikes/ticket.cpp $(inc) $(LIB) -o bin/ticket
+#  $(cxx) $(cflags) spikes/ticket.$(srcext) $(inc) $(LIB) -o bin/ticket
 
 .PHONY: clean
