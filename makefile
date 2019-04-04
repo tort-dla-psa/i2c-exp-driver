@@ -110,32 +110,32 @@ all: validate resp prepare $(TARGET_LIBD) $(TARGET_LIB0) $(TARGET_LIB1) $(TARGET
 $(TARGET_LIBD): $(OBJECT_LIBD)
 	@echo " Compiling $@"
 	@mkdir -p $(libdir)
-	$(cxx) -shared -o $@  $^ $(LIB_LIBD)
+	@$(cxx) -shared -o $@  $^ $(LIB_LIBD)
 
 $(TARGET_LIB0): $(OBJECT_LIB0)
 	@echo " Compiling $@"
 	@mkdir -p $(libdir)
-	$(cxx) -shared -o $@  $^ $(LIB_LIB0)
+	@$(cxx) -shared -o $@  $^ $(LIB_LIB0)
 
 $(TARGET_LIB1): $(OBJECT_LIB1)
 	@echo " Compiling $@"
 	@mkdir -p $(libdir)
-	$(cxx) -shared -o $@  $^ $(LIB_LIB1)
+	@$(cxx) -shared -o $@  $^ $(LIB_LIB1)
 
 $(TARGET_LIB2): $(OBJECT_LIB2)
 	@echo " Compiling $@"
 	@mkdir -p $(libdir)
-	$(cxx) -shared -o $@  $^ $(LIB_LIB2)
+	@$(cxx) -shared -o $@  $^ $(LIB_LIB2)
 
 $(TARGET_LIB3): $(OBJECT_LIB3)
 	@echo " Compiling $@"
 	@mkdir -p $(libdir)
-	$(cxx) -shared -o $@  $^ $(LIB_LIB3)
+	@$(cxx) -shared -o $@  $^ $(LIB_LIB3)
 
 $(TARGET_LIB4): $(OBJECT_LIB4)
 	@echo " Compiling $@"
 	@mkdir -p $(libdir)
-	$(cxx) -shared -o $@  $^ $(LIB_LIB4)
+	@$(cxx) -shared -o $@  $^ $(LIB_LIB4)
 
 
 # application binaries
@@ -143,40 +143,40 @@ $(TARGET_APP0): $(SOURCE_APP0)
 	@echo " Compiling $(APP0)"
 	@mkdir -p $(bindir)
 	@echo " Linking..."
-	$(cxx) $^ $(cflags) $(LDFLAGS) -o $(TARGET_APP0) $(LIB) $(LIB_APP0) -I$(incdir)
+	@$(cxx) $^ $(cflags) $(LDFLAGS) -o $(TARGET_APP0) $(LIB) $(LIB_APP0) -I$(incdir)
 
 $(TARGET_APP1): $(SOURCE_APP1)
 	@echo " Compiling $(APP1)"
 	@mkdir -p $(bindir)
 	@echo " Linking..."
-	$(cxx) $^ $(cflags) $(LDFLAGS) -o $(TARGET_APP1) $(LIB) $(LIB_APP1) -I$(incdir)
+	@$(cxx) $^ $(cflags) $(LDFLAGS) -o $(TARGET_APP1) $(LIB) $(LIB_APP1) -I$(incdir)
 
 $(TARGET_APP2): $(SOURCE_APP2)
 	@echo " Compiling $(APP2)"
 	@mkdir -p $(bindir)
 	@echo " Linking..."
-	$(cxx) $^ $(cflags) $(LDFLAGS) -o $(TARGET_APP2) $(LIB) $(LIB_APP2) -I$(incdir)
+	@$(cxx) $^ $(cflags) $(LDFLAGS) -o $(TARGET_APP2) $(LIB) $(LIB_APP2) -I$(incdir)
 
 
 $(TARGET_PYLIB00): $(OBJECT_PYLIB00)
 	@echo " Compiling $@"
 	@mkdir -p $(PYlibdir)
-	$(cxx) -shared -o $@  $^ $(LIB_PYLIB00)
+	@$(cxx) -shared -o $@  $^ $(LIB_PYLIB00)
 
 $(TARGET_PYLIB0): $(OBJECT_PYLIB0)
 	@echo " Compiling $@"
 	@mkdir -p $(PYlibdir)
-	$(cxx) -shared -o $@  $^ $(LIB_PYLIB0)
+	@$(cxx) -shared -o $@  $^ $(LIB_PYLIB0)
 
 $(TARGET_PYLIB1): $(OBJECT_PYLIB1)
 	@echo " Compiling $@"
 	@mkdir -p $(PYlibdir)
-	$(cxx) -shared -o $@  $^ $(LIB_PYLIB1)
+	@$(cxx) -shared -o $@  $^ $(LIB_PYLIB1)
 
 $(TARGET_PYLIB2): $(OBJECT_PYLIB2)
 	@echo " Compiling $@"
 	@mkdir -p $(PYlibdir)
-	$(cxx) -shared -o $@  $^ $(LIB_PYLIB2)
+	@$(cxx) -shared -o $@  $^ $(LIB_PYLIB2)
 
 
 # generic: build any object file required
@@ -214,7 +214,7 @@ prepare:
 	mkdir -p $(blddir)/lib $(bindir) $(libdir)
 # Tests
 tester:
-	$(cxx) $(cflags) test/tester.$(srcext) $(inc) $(LIB) -o bin/tester
+	@$(cxx) $(cflags) test/tester.$(srcext) $(inc) $(LIB) -o bin/tester
 
 # Spikes
 #ticket:
